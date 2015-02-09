@@ -134,6 +134,7 @@ def process(type, width, height, path):
         else:
             abort(400)
 
+
 def init_imageserver(app, s3_bucket):
     global S3_BUCKET
     S3_BUCKET = s3_bucket
@@ -142,21 +143,17 @@ def init_imageserver(app, s3_bucket):
     def contain_both(width, height, path):
         return process('contain', width, height, path)
 
-
     @app.route('/media/w<int:width>/for/<path:path>')
     def contain_width(width, path):
         return process('contain', width, None, path)
-
 
     @app.route('/media/h<int:height>/for/<path:path>')
     def contain_height(height, path):
         return process('contain', None, height, path)
 
-
     @app.route('/media/cover/w<int:width>/h<int:height>/for/<path:path>')
     def cover(width, height, path):
         return process('cover', width, height, path)
-
 
     @app.route('/media/crop/w<int:width>/h<int:height>/for/<path:path>')
     def crop(width, height, path):
