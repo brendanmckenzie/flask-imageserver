@@ -3,92 +3,13 @@ import requests
 from StringIO import StringIO
 from PIL import Image
 from flask import abort, send_file, request
+from contain import process_contain
+from crop import process_crop
+from cover import process_cover
 
 MAX_WIDTH, MAX_HEIGHT = 4000, 4000
 
 S3_BUCKET = None
-
-
-def process_contain(img, width, height):
-    orig_width, orig_height = img.size
-
-    orig_width = float(orig_width)
-    orig_height = float(orig_height)
-
-    if width and height:
-        width = float(width)
-        height = float(height)
-
-        height_by_width = width * orig_height / orig_width
-        width_by_height = orig_width / orig_height * height
-
-        if height_by_width > height:
-            width = width_by_height
-        else:
-            height = height_by_width
-    elif width:
-        width = float(width)
-        height = width * orig_height / orig_width
-    elif height:
-        height = float(height)
-        width = orig_width / orig_height * height
-
-    new_size = int(width), int(height)
-
-    return img.resize(new_size, Image.ANTIALIAS)
-
-
-def process_cover(img, width, height):
-    orig_width, orig_height = img.size
-
-    orig_width = float(orig_width)
-    orig_height = float(orig_height)
-    width = float(width)
-    height = float(height)
-    dest_width = width
-    dest_height = height
-
-    if width > orig_width or height > orig_height:
-        # can't upscale
-        return None
-
-    # 1. resize
-    if orig_width > orig_height:
-        dest_height = dest_width * orig_height / orig_width
-    else:
-        dest_width = orig_width / orig_height * dest_height
-
-    new_size = int(dest_width), int(dest_height)
-
-    resized = img.resize(new_size, Image.ANTIALIAS)
-
-    # 2. crop
-    crop_x0 = int((dest_width / 2) - (width / 2))
-    crop_x1 = int((dest_width / 2) + (width / 2))
-    crop_y0 = int((dest_height / 2) - (height / 2))
-    crop_y1 = int((dest_height / 2) + (height / 2))
-
-    return resized.crop((crop_x0, crop_y0, crop_x1, crop_y1))
-
-
-def process_crop(img, width, height):
-    orig_width, orig_height = img.size
-
-    orig_width = float(orig_width)
-    orig_height = float(orig_height)
-    width = float(width)
-    height = float(height)
-
-    if width > orig_width or height > orig_height:
-        # can't upscale
-        return None
-
-    crop_x0 = int((orig_width / 2) - (width / 2))
-    crop_x1 = int((orig_width / 2) + (width / 2))
-    crop_y0 = int((orig_height / 2) - (height / 2))
-    crop_y1 = int((orig_height / 2) + (height / 2))
-
-    return img.crop((crop_x0, crop_y0, crop_x1, crop_y1))
 
 
 def process(type, width, height, path):
@@ -104,7 +25,7 @@ def process(type, width, height, path):
     if height > MAX_HEIGHT:
         height = MAX_HEIGHT
 
-    with tempfile.NamedTemporaryFile(prefix='img-', delete=True) as fd:
+    with tempfile.NamedTemporaryFile(prefix='img-') as fd:
         url = 'https://s3.amazonaws.com/%s/%s' % (S3_BUCKET, path, )
         resp = requests.get(url, stream=True)
 
