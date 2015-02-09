@@ -29,3 +29,5 @@ The available transformations are:
 * `contain` returns an image for the input width/height with no surrounding whitespace maintaining the aspect ratio
 * `cover` returns an image whose sizes are exactly the ones specified. The original image is scaled down to cover entirely the specified area and then the exceding parte of the image are "cut out" to fit the new aspect ratio
 * `crop` returns an image whose sizes are exactly the ones specified. The reduced image is obtained picking it from a rectangle of the same sizes from the center of the image
+
+*Note*: This library does not cache the image, the idea is that this should be placed behind a CDN (such as [CloudFront](http://aws.amazon.com/cloudfront/)) and caching will occur there.
