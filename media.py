@@ -9,10 +9,8 @@ from cover import process_cover
 
 MAX_WIDTH, MAX_HEIGHT = 4000, 4000
 
-S3_BUCKET = None
 
-
-def process(type, width, height, path):
+def process(type, width, height, path, s3_bucket):
     processors = {
         'contain': process_contain,
         'cover': process_cover,
@@ -26,7 +24,7 @@ def process(type, width, height, path):
         height = MAX_HEIGHT
 
     with tempfile.NamedTemporaryFile(prefix='img-') as fd:
-        url = 'https://s3.amazonaws.com/%s/%s' % (S3_BUCKET, path, )
+        url = 'https://s3.amazonaws.com/%s/%s' % (s3_bucket, path, )
         resp = requests.get(url, stream=True)
 
         if not resp.ok:
@@ -54,28 +52,3 @@ def process(type, width, height, path):
             return send_file(img_io, mimetype='image/jpeg', cache_timeout=604800)
         else:
             abort(400)
-
-
-def init_imageserver(app, s3_bucket):
-    global S3_BUCKET
-    S3_BUCKET = s3_bucket
-
-    @app.route('/media/w<int:width>/h<int:height>/for/<path:path>')
-    def contain_both(width, height, path):
-        return process('contain', width, height, path)
-
-    @app.route('/media/w<int:width>/for/<path:path>')
-    def contain_width(width, path):
-        return process('contain', width, None, path)
-
-    @app.route('/media/h<int:height>/for/<path:path>')
-    def contain_height(height, path):
-        return process('contain', None, height, path)
-
-    @app.route('/media/cover/w<int:width>/h<int:height>/for/<path:path>')
-    def cover(width, height, path):
-        return process('cover', width, height, path)
-
-    @app.route('/media/crop/w<int:width>/h<int:height>/for/<path:path>')
-    def crop(width, height, path):
-        return process('crop', width, height, path)
