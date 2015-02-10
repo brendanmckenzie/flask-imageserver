@@ -1,3 +1,6 @@
+from PIL import Image
+
+
 def process_cover(img, width, height):
     orig_width, orig_height = img.size
 
