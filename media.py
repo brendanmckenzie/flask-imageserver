@@ -3,20 +3,19 @@ import requests
 from StringIO import StringIO
 from PIL import Image
 from flask import abort, send_file, request
-from contain import process_contain
-from crop import process_crop
-from cover import process_cover
+import processors
 
 MAX_WIDTH, MAX_HEIGHT = 4000, 4000
 
 
-def process(type, width, height, path, s3_bucket):
-    processors = {
-        'contain': process_contain,
-        'cover': process_cover,
-        'crop': process_crop
-    }
+_processors = {
+    'contain': processors.process_contain,
+    'cover': processors.process_cover,
+    'crop': processors.process_crop
+}
 
+
+def process(type, width, height, path, s3_bucket):
     # sanitise...
     if width > MAX_WIDTH:
         width = MAX_WIDTH
@@ -41,12 +40,14 @@ def process(type, width, height, path, s3_bucket):
         img = Image.open(fd)
         ret = None
 
-        if type in processors:
-            ret = processors[type](img, width, height)
+        if type in _processors:
+            ret = _processors[type](img, width, height)
 
         if ret:
+            quality = request.args.get('qual', 100)
+
             img_io = StringIO()
-            ret.save(img_io, 'JPEG', quality=request.args.get('qual', 100))
+            ret.save(img_io, 'JPEG', quality=quality)
             img_io.seek(0)
 
             return send_file(img_io,
