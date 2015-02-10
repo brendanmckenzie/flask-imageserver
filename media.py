@@ -49,6 +49,8 @@ def process(type, width, height, path, s3_bucket):
             ret.save(img_io, 'JPEG', quality=request.args.get('qual', 100))
             img_io.seek(0)
 
-            return send_file(img_io, mimetype='image/jpeg', cache_timeout=604800)
+            return send_file(img_io,
+                             mimetype='image/jpeg',
+                             cache_timeout=604800)
         else:
             abort(400)

@@ -1,5 +1,6 @@
 from media import process
 
+
 def init_imageserver(app, s3_bucket):
     @app.route('/media/w<int:width>/h<int:height>/for/<path:path>')
     def contain_both(width, height, path):
