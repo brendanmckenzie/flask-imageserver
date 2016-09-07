@@ -15,28 +15,14 @@ _processors = {
 }
 
 
-def process(type, width, height, path, s3_bucket):
+def process(type, width, height, path, root_path):
     # sanitise...
     if width > MAX_WIDTH:
         width = MAX_WIDTH
     if height > MAX_HEIGHT:
         height = MAX_HEIGHT
 
-    with tempfile.NamedTemporaryFile(prefix='img-') as fd:
-        url = 'https://s3.amazonaws.com/%s/%s' % (s3_bucket, path, )
-        resp = requests.get(url, stream=True)
-
-        if not resp.ok:
-            abort(404)
-
-        for block in resp.iter_content(1024):
-            if not block:
-                break
-
-            fd.write(block)
-
-        fd.seek(0)
-
+    with open(root_path + '/' + path, 'r')  as fd:
         img = Image.open(fd)
         ret = None
 
