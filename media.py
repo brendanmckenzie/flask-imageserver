@@ -1,5 +1,3 @@
-import tempfile
-import requests
 from StringIO import StringIO
 from PIL import Image
 from flask import abort, send_file, request
@@ -15,14 +13,14 @@ _processors = {
 }
 
 
-def process(type, width, height, path, root_path):
+def process(type, width, height, path, provider):
     # sanitise...
     if width > MAX_WIDTH:
         width = MAX_WIDTH
     if height > MAX_HEIGHT:
         height = MAX_HEIGHT
 
-    with open(root_path + '/' + path, 'r')  as fd:
+    with provider.get_fd(path) as fd:
         img = Image.open(fd)
         ret = None
 
