@@ -1,0 +1,11 @@
+version: "2"
+services:
+    imageserver:
+        image: "brendanmckenzie/flask-imageserver"
+        environment:
+            MEDIA_ROOT: /media
+        ports:
+            - "5000:5000"
+        volumes:
+            - "/opt/media:/media"
+
