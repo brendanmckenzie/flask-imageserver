@@ -3,7 +3,7 @@ import tempfile
 import requests
 
 
-class S3SystemProvider(BaseProvider):
+class S3Provider(BaseProvider):
     def __init__(self, s3_bucket):
         self.s3_bucket = s3_bucket
 

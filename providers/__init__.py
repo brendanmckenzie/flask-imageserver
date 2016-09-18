@@ -1,4 +1,4 @@
 from FileSystemProvider import FileSystemProvider
-from S3SystemProvider import S3SystemProvider
+from S3Provider import S3Provider
 
-__all__ = ['FileSystemProvider', 'S3SystemProvider']
+__all__ = ['FileSystemProvider', 'S3Provider']

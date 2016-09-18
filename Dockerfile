@@ -1,5 +1,5 @@
-FROM python:2-onbuild
+FROM tiangolo/uwsgi-nginx-flask:flask
 
-CMD [ "python", "./app.py" ]
+COPY ./ /app/
 
-
+RUN ["pip", "install", "-r", "/app/requirements.txt"]
